@@ -1,0 +1,37 @@
+#DEF_SHADER
+#VERT_SHADER
+
+
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+out vec2 texCoord;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+void main() {
+  //gl_Position = transform * vec4(aPos, 1.0);
+  gl_Position = projection * view * model * vec4(aPos, 1.0);
+
+  texCoord = aTexCoord;
+}
+
+#FRAG_SHADER
+
+#version 330 core
+out vec4 FragColor;
+
+in vec2 texCoord;
+
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+
+void main() {
+  //FragColor = texture(outTexture, texCoord) * vec4(outColor, 1.0);
+  FragColor = mix(texture(texture1, texCoord), texture(texture2, texCoord), 0.5); 
+}
+
+#END_SHADER
