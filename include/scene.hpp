@@ -19,7 +19,9 @@ class Scene {
 private:
   float deltaTime;
   float lastFrame;
+
 public:
+  static inline bool dbg_mode = false;
   Camera* cam;
   std::vector<Object*> objects;
   std::vector<Shader*> shader;
@@ -37,5 +39,7 @@ public:
   void render();
 
   void processInput();
+
+  float get_delta_time();
 };
 

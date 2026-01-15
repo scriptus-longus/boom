@@ -21,8 +21,10 @@
 #include "mesh.hpp"
 #include "scene.hpp"
 #include "object.hpp"
+#include "map.hpp"
 
-#define MAX_TEXTURES 9
+/*#define MAP_MAX_X 6
+#define MAP_MAX_Z 11*/
 
 //float cubeModel[] = {
 std::vector<float> cubeModel = {
@@ -72,6 +74,112 @@ std::vector<uint32_t> cubeIndices =  {
   20, 21, 22,  22, 23, 20    // Bottom
 };
 
+int gameMap[MAP_MAX_X][MAP_MAX_Z] = {
+  {1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0},
+  {1, 2, 0, 1, 0, 0, 1, 0, 1, 0, 0},
+  {1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0},
+  {1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+  {0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0},
+  {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+};
+
+/*class Map {
+private:
+  static inline int map[MAP_MAX_X][MAP_MAX_Z] = {
+      {1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0},
+      {1, 2, 0, 1, 0, 0, 1, 0, 1, 0, 0},
+      {1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0},
+      {1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+      {0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0},
+      {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+    };
+  static inline glm::vec3 start_pos;
+
+public:
+  static void init(int map[MAP_MAX_X][MAP_MAX_Z]) {
+    std::memcpy(this->map, map, MAP_MAX_X*MAP_MAX_Z*sizeof(int));
+    for 
+    for (int x = 0; x < MAP_MAX_X; x++) {
+      for (size_t z = 0; z < MAP_MAX_Z; z++) {
+        if (map[x][z] == 1) {
+          start_pos = {-x, 0.0f, z};
+        }
+      }
+    }
+  }
+
+  bool is_free(glm::vec3 point) {
+    int x = -1 * (int)point.x;
+    int z = (int)point.z;
+    
+    // check if point is off map
+    if (x > MAP_MAX_X || z  > MAP_MAX_Z || x < 0 || z < 0) 
+      return false
+
+    return map[x][y] != 0
+  }
+
+  glm::vec3 get_start_pos() {
+    return start_pos;
+  }
+}*/
+
+class Player {
+private:
+  Camera *cam;
+  glm::vec3 position;
+
+public:
+  Player(Camera* cam) {
+    this->cam = cam;
+    this->position = cam->get_position();
+  }
+
+  // movement relative to Player coordinates
+  void move(glm::vec3 v) {
+    auto frontVec = this->cam->get_front();
+    glm::vec3 base_x = glm::normalize(glm::vec3(frontVec.x, 0.0, frontVec.z));
+    glm::vec3 base_z = glm::normalize(glm::cross(frontVec, this->cam->get_up()));
+
+    // linear combindation
+    glm::vec3 new_pos = this->position + v.x * base_x + v.z * base_z; //+ v.y * base_y;
+
+    if (Map::is_walkable(new_pos.x, this->position.z)) {
+      this->position.x = new_pos.x;
+    }
+
+    if (Map::is_walkable(this->position.x, new_pos.z)) {
+      this->position.z = new_pos.z;
+    }
+
+    // update cam position
+    //this->cam->set_position(new_pos);
+  }
+  
+
+  void update(float dt) {
+    float v = 4.0f * dt;
+
+    /*
+    Player movement
+    */
+    if(InputHandler::keyDown(GLFW_KEY_W))
+      this->move({v, 0.0, 0.0});
+    if(InputHandler::keyDown(GLFW_KEY_S)) 
+      this->move({-v, 0.0, 0.0});
+
+    if(InputHandler::keyDown(GLFW_KEY_A)) 
+      this->move({0.0, 0.0, -v});
+    if(InputHandler::keyDown(GLFW_KEY_D)) 
+      this->move({0.0, 0.0, v});
+
+
+    auto delta = InputHandler::pullMouseDelta();
+    this->cam->rotate(delta.y, delta.x);
+    this->cam->set_position(this->position);
+  }
+};
+
 void framebuffer_size_callback(GLFWwindow*, int width, int height) {
   glViewport(0, 0, width, height);
 }
@@ -79,6 +187,28 @@ void framebuffer_size_callback(GLFWwindow*, int width, int height) {
 
 void mouse_callback(GLFWwindow*, double xpos, double ypos) {
   InputHandler::handleMouseMove(xpos, ypos);
+}
+
+
+std::vector<Object> build_map(int map[MAP_MAX_X][MAP_MAX_Z],  Mesh* mesh, Material* material) {
+  std::vector<Object> cubes;
+
+  for (int x = 0; x < MAP_MAX_X; x++) {
+    for (size_t z = 0; z < MAP_MAX_Z; z++) {
+      if (map[x][z] == 1) {
+        Object cube;
+        auto cubePosition = glm::vec3(x + 0.5, 0.0f, z + 0.5);
+
+        cube.move_to(cubePosition);
+        cube.add_mesh(mesh);
+        cube.add_material(material);
+
+        cubes.emplace_back(cube);
+      }
+    }
+  }
+
+  return cubes;
 }
 
 
@@ -120,8 +250,8 @@ int main() {
   /* --------------------
   Create the Scene
   ----------------------*/
-  Camera cam = Camera(glm::vec3(0.0f, 0.0f, -7.0f),
-                    glm::vec3(0.0f, 0.0f, 0.0f));
+  Camera cam = Camera(glm::vec3(1.5f, 0.0f, 1.5f),
+                    glm::vec3(1.5f, 0.0f, 2.0f));
   Scene scene(&cam, window);
   
 
@@ -144,16 +274,19 @@ int main() {
   --------------------------------------*/
   Material my_material = Material(&shader);
 
-  my_material.add_texture("res/textures/face.png", "texture1");
-  my_material.add_texture("res/textures/container.jpg", "texture2");
+  //my_material.add_texture("res/textures/face.png", "texture1");
+  //my_material.add_texture("res/textures/container.jpg", "texture2");
+  my_material.add_texture("res/textures/wall.png", "texture1");
   my_material.map_uniforms();
 
   /* --------------------------
   Create objects in the scene
   -----------------------------*/
   Mesh cubeMesh(cubeModel, cubeIndices);
+  Map::init(gameMap);
 
-  glm::vec3 cubePositions[] = {
+  auto cubes = build_map(gameMap, &cubeMesh, &my_material);
+  /*glm::vec3 cubePositions[] = {
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3( 2.0f,  5.0f, -15.0f), 
     glm::vec3(-1.5f, -2.2f, -2.5f),  
@@ -164,19 +297,19 @@ int main() {
     glm::vec3( 1.5f,  2.0f, -2.5f), 
     glm::vec3( 1.5f,  0.2f, -1.5f), 
     glm::vec3(-1.3f,  1.0f, -1.5f) 
-  };
+  };*/
 
-  Object cubes[10];
-  for (size_t i = 0; i < 10; i++) {
+  //Object cubes[10];
+  Player player(&cam);
 
-    cubes[i].move_to(cubePositions[i]);
-    cubes[i].add_mesh(&cubeMesh);
-    cubes[i].add_material(&my_material);
-
+  for (size_t i = 0; i < cubes.size(); i++) {
     scene.add_object(&cubes[i]);
   }
 
   while(!glfwWindowShouldClose(window)) {
+    if (!scene.dbg_mode) {
+      player.update(scene.get_delta_time());
+    }
     scene.update();
     scene.render();
 

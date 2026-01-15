@@ -41,8 +41,13 @@ void InputHandler::getKeyPress(GLFWwindow* window) {
   key_down_map[GLFW_KEY_A] = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
   key_down_map[GLFW_KEY_S] = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
   key_down_map[GLFW_KEY_D] = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-  key_down_map[GLFW_KEY_ESCAPE] = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 
+  key_down_map[GLFW_KEY_UP] = glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
+  key_down_map[GLFW_KEY_DOWN] = glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
+  
+  key_down_map[GLFW_KEY_TAB] = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
+
+  key_down_map[GLFW_KEY_ESCAPE] = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 }
 
 bool InputHandler::keyDown(int key) {

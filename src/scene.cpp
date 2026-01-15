@@ -69,6 +69,7 @@ void Scene::render() {
   // update view and projection in camera
   auto view = this->cam->get_lookAt();
   auto projection = this->cam->get_projection(width, height);
+
   for (auto& s : this->shader) {
     s->set_uniformMat("projection", projection);
     s->set_uniformMat("view", view);
@@ -76,9 +77,9 @@ void Scene::render() {
 }
 
 void Scene::processInput() {
-  float camSpeed = static_cast<float>(4.0f * this->deltaTime);
+  float v = static_cast<float>(4.0f * this->deltaTime);
 
-  if(InputHandler::keyDown(GLFW_KEY_W)) 
+  /*if(InputHandler::keyDown(GLFW_KEY_W))
     this->cam->move_front(camSpeed);
   if(InputHandler::keyDown(GLFW_KEY_S)) 
     this->cam->move_front(-camSpeed);
@@ -86,8 +87,31 @@ void Scene::processInput() {
   if(InputHandler::keyDown(GLFW_KEY_A)) 
     this->cam->move_right(-camSpeed);
   if(InputHandler::keyDown(GLFW_KEY_D)) 
-    this->cam->move_right(camSpeed);
-  
+    this->cam->move_right(camSpeed);*/
+  if(InputHandler::keyPressed(GLFW_KEY_TAB))
+    this->dbg_mode = !this->dbg_mode;
+
+  // debug mode only features
+  if (!this->dbg_mode) {
+    return;
+  }
+
+  if(InputHandler::keyDown(GLFW_KEY_W))
+    this->cam->move({v, 0.0, 0.0});
+  if(InputHandler::keyDown(GLFW_KEY_S)) 
+    this->cam->move({-v, 0.0, 0.0});
+
+  if(InputHandler::keyDown(GLFW_KEY_A)) 
+    this->cam->move({0.0, 0.0, -v});
+  if(InputHandler::keyDown(GLFW_KEY_D)) 
+    this->cam->move({0.0, 0.0, v});
+
+  if(InputHandler::keyDown(GLFW_KEY_UP)) 
+    this->cam->move_yoffset(v);
+  if(InputHandler::keyDown(GLFW_KEY_DOWN))
+    this->cam->move_yoffset(-v);
+
+
   if(InputHandler::keyPressed(GLFW_KEY_ESCAPE)) {
     int32_t polygonMode[2];
 
@@ -100,6 +124,9 @@ void Scene::processInput() {
   }
 
   auto delta = InputHandler::pullMouseDelta();
-  cam->rotate(delta.y, delta.x);
+  this->cam->rotate(delta.y, delta.x);
 }
 
+float Scene::get_delta_time() {
+  return this->deltaTime;
+}

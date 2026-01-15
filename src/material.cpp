@@ -40,16 +40,17 @@ void Material::add_texture(std::string path, std::string uniform) {
 
   int widht, height, nrChannels;
 
-  //stbi_set_flip_vertically_on_load(true);
+  stbi_set_flip_vertically_on_load(true);
 
   unsigned char* data = stbi_load(path.c_str(), &widht, &height, &nrChannels, 0);
+  std::cout << "width: " << widht << std::endl;
   if (data) {
     std::cout << "Info: Loaded texture successfully from " << path << std::endl;
 
     if (path.find(".jpg") != std::string::npos) {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     }
 
     glGenerateMipmap(GL_TEXTURE_2D);

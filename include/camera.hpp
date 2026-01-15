@@ -6,7 +6,7 @@
 
 class Camera {
 private:
-  glm::vec3 camPos;
+  glm::vec3 position;
   glm::vec3 camFront;
   glm::vec3 camUp;
 
@@ -29,10 +29,10 @@ public:
   Functions to move the camera
   */
   void move(glm::vec3);
-
+  /*
   void move_front(float);
 
-  void move_right(float);
+  void move_right(float);*/
 
   void set_position(glm::vec3);
   
@@ -43,7 +43,7 @@ public:
 
   void move_zoffset(float);
 
-  glm::vec3 get_pos();
+  glm::vec3 get_position();
 
   glm::vec3 get_front();
 

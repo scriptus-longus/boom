@@ -16,6 +16,7 @@ private:
   static inline bool prev_key_down_map[300] = {false};
   static inline bool key_down_map[300] = {false};
 
+
   static constexpr float mouseSensitivity = 1.0f;
 public:
   static void handleMouseMove(double, double);
