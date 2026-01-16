@@ -76,10 +76,10 @@ std::vector<uint32_t> cubeIndices =  {
 
 int gameMap[MAP_MAX_X][MAP_MAX_Z] = {
   {1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0},
-  {1, 2, 0, 1, 0, 0, 1, 0, 1, 0, 0},
-  {1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0},
-  {1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-  {0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0},
+  {1, 2, 2, 1, 0, 0, 1, 2, 1, 0, 0},
+  {1, 2, 2, 1, 1, 1, 1, 2, 1, 0, 0},
+  {1, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0},
+  {0, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0},
   {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 };
 
@@ -190,20 +190,40 @@ void mouse_callback(GLFWwindow*, double xpos, double ypos) {
 }
 
 
-std::vector<Object> build_map(int map[MAP_MAX_X][MAP_MAX_Z],  Mesh* mesh, Material* material) {
+std::vector<Object> build_map(int map[MAP_MAX_X][MAP_MAX_Z], 
+                              Mesh* mesh, 
+                              Material* wallMaterial,
+                              Material* floorMaterial,
+                              Material* topMaterial) {
   std::vector<Object> cubes;
 
   for (int x = 0; x < MAP_MAX_X; x++) {
     for (size_t z = 0; z < MAP_MAX_Z; z++) {
+      Object cube;
+
       if (map[x][z] == 1) {
-        Object cube;
         auto cubePosition = glm::vec3(x + 0.5, 0.0f, z + 0.5);
 
         cube.move_to(cubePosition);
         cube.add_mesh(mesh);
-        cube.add_material(material);
+        cube.add_material(wallMaterial);
 
         cubes.emplace_back(cube);
+      } else if (map[x][z] == 2) {
+        auto cubePosition = glm::vec3(x + 0.5, -1.0f, z + 0.5);
+
+        cube.move_to(cubePosition);
+        cube.add_mesh(mesh);
+        cube.add_material(floorMaterial);
+
+        cubes.emplace_back(cube);
+
+        // add top cube
+        Object topCube;
+        topCube.move_to(glm::vec3(x+0.5, 1.0f, z+0.5f));
+        topCube.add_mesh(mesh);
+        topCube.add_material(topMaterial);
+        cubes.emplace_back(topCube);
       }
     }
   }
@@ -272,20 +292,33 @@ int main() {
   /* -----------------------------------
   load textures and create materials
   --------------------------------------*/
-  Material my_material = Material(&shader);
+  Material wallMaterial = Material(&shader);
 
   //my_material.add_texture("res/textures/face.png", "texture1");
   //my_material.add_texture("res/textures/container.jpg", "texture2");
-  my_material.add_texture("res/textures/wall.png", "texture1");
-  my_material.map_uniforms();
+  wallMaterial.add_texture("res/textures/wall.png", "texture1");
+  wallMaterial.map_uniforms();
 
+  Material floorMaterial = Material(&shader);
+
+  floorMaterial.add_texture("res/textures/container.jpg", "texture1");
+  floorMaterial.map_uniforms();
+
+  Material topMaterial = Material(&shader);
+
+  topMaterial.add_texture("res/textures/grey.png", "texture1");
+  topMaterial.map_uniforms();
   /* --------------------------
   Create objects in the scene
   -----------------------------*/
   Mesh cubeMesh(cubeModel, cubeIndices);
   Map::init(gameMap);
 
-  auto cubes = build_map(gameMap, &cubeMesh, &my_material);
+  auto cubes = build_map(gameMap, 
+                        &cubeMesh, 
+                        &wallMaterial,
+                        &floorMaterial,
+                        &topMaterial);
   /*glm::vec3 cubePositions[] = {
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3( 2.0f,  5.0f, -15.0f), 

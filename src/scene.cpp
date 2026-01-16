@@ -88,8 +88,10 @@ void Scene::processInput() {
     this->cam->move_right(-camSpeed);
   if(InputHandler::keyDown(GLFW_KEY_D)) 
     this->cam->move_right(camSpeed);*/
-  if(InputHandler::keyPressed(GLFW_KEY_TAB))
+  if(InputHandler::keyPressed(GLFW_KEY_TAB)) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     this->dbg_mode = !this->dbg_mode;
+  }
 
   // debug mode only features
   if (!this->dbg_mode) {
