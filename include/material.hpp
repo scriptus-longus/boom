@@ -25,7 +25,7 @@ public:
 
   ~Material();
 
-  void add_texture(std::string path, std::string uniform);
+  void add_texture(std::string, std::string, GLenum format = GL_RGB);
 
   void map_uniforms();
 

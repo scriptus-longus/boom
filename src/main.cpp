@@ -22,9 +22,14 @@
 #include "scene.hpp"
 #include "object.hpp"
 #include "map.hpp"
+#include "texture.hpp"
+#include "animation.hpp"
+#include "sprite.hpp"
 
 /*#define MAP_MAX_X 6
 #define MAP_MAX_Z 11*/
+
+#define MAX_MATERIALS 10
 
 //float cubeModel[] = {
 std::vector<float> cubeModel = {
@@ -74,6 +79,20 @@ std::vector<uint32_t> cubeIndices =  {
   20, 21, 22,  22, 23, 20    // Bottom
 };
 
+
+std::vector<float> rectangleModel = {
+  -0.5f, -0.5f,  00.0f,   0.0f, 0.0f,
+   0.5f, -0.5f,  0.0f,   1.0f, 0.0f,
+   0.5f,  0.5f,  0.0f,   1.0f, 1.0f,
+  -0.5f,  0.5f,  0.0f,   0.0f, 1.0f
+};
+
+std::vector<uint32_t> rectangleIndices =  {
+   0,  1,  2,   
+   2,  3,  0,   // Front
+};
+
+
 int gameMap[MAP_MAX_X][MAP_MAX_Z] = {
   {1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0},
   {1, 2, 2, 1, 0, 0, 1, 2, 1, 0, 0},
@@ -82,6 +101,7 @@ int gameMap[MAP_MAX_X][MAP_MAX_Z] = {
   {0, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0},
   {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 };
+
 
 /*class Map {
 private:
@@ -127,11 +147,14 @@ public:
 class Player {
 private:
   Camera *cam;
+  Sprite *gun;
   glm::vec3 position;
 
 public:
-  Player(Camera* cam) {
+  Player(Camera* cam, Sprite* gun) {
     this->cam = cam;
+    this->gun = gun;
+
     this->position = cam->get_position();
   }
 
@@ -173,12 +196,180 @@ public:
     if(InputHandler::keyDown(GLFW_KEY_D)) 
       this->move({0.0, 0.0, v});
 
+    if(InputHandler::keyPressed(GLFW_KEY_SPACE))
+      this->gun->play_animation();
 
     auto delta = InputHandler::pullMouseDelta();
-    this->cam->rotate(delta.y, delta.x);
+    this->cam->rotate(-delta.y, delta.x);
     this->cam->set_position(this->position);
   }
 };
+
+/*class Texture {
+private:
+  std::string uniform;
+public:
+  int width;
+  int height;
+
+  uint32_t texture;
+
+  Texture(std::string path, GLenum format, bool flip = false) {
+    glGenTextures(1, &this->texture);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+
+    // maybe configure wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    //int widht, height, nrChannels;
+
+    if (flip) {
+      stbi_set_flip_vertically_on_load(true);
+    }
+
+    int nrChannels;
+    unsigned char* data = stbi_load(path.c_str(), &this->width, &this->height, &nrChannels, 0);
+    if (data) {
+      std::cout << "Info: Loaded texture successfully from " << path << std::endl;
+
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, format, GL_UNSIGNED_BYTE, data);
+
+      //glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+      std::cout << "Error: Could not load texture image " << path << std::endl;
+    }
+
+    stbi_image_free(data);
+
+    this->uniform = "texture1";   // TODO change
+  }
+
+  *Texture() {
+    glDeleteTextures(1, &this->texture);
+  }
+
+  void activate() {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    //this->shader->run();
+  }
+};*/
+
+/*class Animation {
+private:
+  //std::vector<Texture*> frames;
+  //Texture* atlas;
+  std::vector<glm::vec4> UVs;
+  float frame_time;   // in fps
+  
+  bool started_playing;
+  bool finished_playing;
+
+  int current_frame;
+
+  float timer;
+public:
+  Animation(std::vector<glm::vec4> UVs) {
+    this->frame_time = 0.04;
+    this->UVs = UVs;
+
+    this->started_playing = false;
+    this->current_frame = 0;
+
+    this->timer = 0.0f;
+  }
+
+  glm::vec4 getUV() {
+    return this->UVs[current_frame];
+  }
+
+  void play() {
+    this->started_playing = true;
+    this->finished_playing = false;
+  }
+
+  void update(float dt, bool cycle = false) {
+    if (!this->started_playing)
+      return;
+  
+    this->timer += dt;
+    if (timer >= this->frame_time) {
+      timer = 0.0f;
+      current_frame = (current_frame + 1) % this->UVs.size();
+
+      if (current_frame == 0 && this->is_playing()) {
+        this->finished_playing = true;
+        this->started_playing = false;
+      }
+    }
+  }
+
+  bool is_playing() {
+    if (this->started_playing && !this->finished_playing)
+      return true;
+    return false;
+  }
+};*/
+
+
+// Sprites live in the camera space not world space
+/*class Sprite {
+  Shader *shader;
+  Texture *texture;
+
+  //std::vector<Animation> animations;
+  glm::vec4 uv;
+  Mesh* mesh;
+  glm::vec2 position;
+
+public:
+  Animation* animation;
+
+  Sprite(Mesh* mesh, Texture* texture, Shader* shader, glm::vec2 position = {0, 0}, glm::vec4 uv = {0.0, 0.0, 1.0, 1.0}) {
+  //rectangle.move_to(glm::vec3(0.2f, -0.6f, 0.0f));
+    this->texture = texture;
+    this->shader = shader;
+    this->mesh = mesh;
+    this->uv = uv;
+    this->position = position;
+    this->animation = nullptr;
+  }
+
+  void add_animation(Animation* animation) {
+    this->animation = animation;
+  }
+
+  void play_animation() {
+    if (animation != nullptr) {
+      animation->play();
+    }
+  }
+
+  void update(float dt) {
+    if (animation != nullptr) {
+      animation->update(dt);
+      this->uv = animation->getUV();
+    }
+  }
+
+  void draw() {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, {this->position.x, this->position.y, 0.0f});
+
+    this->texture->activate();
+    this->shader->run();
+
+    this->shader->set_uniform("uv", this->uv.x, this->uv.y, this->uv.z, this->uv.w);
+
+    this->shader->set_uniformMat("model", model);
+    this->mesh->draw();
+  }
+};*/
+
+static Material* materialMap[MAX_MATERIALS];
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height) {
   glViewport(0, 0, width, height);
@@ -191,39 +382,40 @@ void mouse_callback(GLFWwindow*, double xpos, double ypos) {
 
 
 std::vector<Object> build_map(int map[MAP_MAX_X][MAP_MAX_Z], 
-                              Mesh* mesh, 
-                              Material* wallMaterial,
-                              Material* floorMaterial,
-                              Material* topMaterial) {
+                              Mesh* mesh) {
+                              //Material* wallMaterial,
+                              //Material* floorMaterial,
+                              //Material* topMaterial) {
   std::vector<Object> cubes;
 
   for (int x = 0; x < MAP_MAX_X; x++) {
     for (size_t z = 0; z < MAP_MAX_Z; z++) {
       Object cube;
+      cube.add_mesh(mesh);
+      cube.add_material(materialMap[map[x][z] - 1]);
 
-      if (map[x][z] == 1) {
-        auto cubePosition = glm::vec3(x + 0.5, 0.0f, z + 0.5);
-
-        cube.move_to(cubePosition);
-        cube.add_mesh(mesh);
-        cube.add_material(wallMaterial);
-
-        cubes.emplace_back(cube);
-      } else if (map[x][z] == 2) {
+      if (map[x][z] == 2) {
         auto cubePosition = glm::vec3(x + 0.5, -1.0f, z + 0.5);
 
         cube.move_to(cubePosition);
-        cube.add_mesh(mesh);
-        cube.add_material(floorMaterial);
-
         cubes.emplace_back(cube);
 
-        // add top cube
         Object topCube;
         topCube.move_to(glm::vec3(x+0.5, 1.0f, z+0.5f));
+
         topCube.add_mesh(mesh);
-        topCube.add_material(topMaterial);
+        topCube.add_material(materialMap[MAX_MATERIALS-1]);
+
         cubes.emplace_back(topCube);
+        //cube.add_mesh(mesh);
+        //cube.add_material(wallMaterial);
+
+      } else {
+        auto cubePosition = glm::vec3(x + 0.5, 0.0f, z + 0.5);
+        //cube.add_material(materialMap[map[x][z] - 1]);
+        cube.move_to(cubePosition);
+
+        cubes.emplace_back(cube);
       }
     }
   }
@@ -286,8 +478,10 @@ int main() {
   }
 
   Shader shader(srcs[0]);
+  Shader player_shader(srcs[1]);
 
   scene.add_shader(&shader);
+  scene.add_shader(&player_shader);
 
   /* -----------------------------------
   load textures and create materials
@@ -301,52 +495,84 @@ int main() {
 
   Material floorMaterial = Material(&shader);
 
-  floorMaterial.add_texture("res/textures/container.jpg", "texture1");
+  floorMaterial.add_texture("res/textures/floor.png", "texture1");
   floorMaterial.map_uniforms();
 
   Material topMaterial = Material(&shader);
 
   topMaterial.add_texture("res/textures/grey.png", "texture1");
   topMaterial.map_uniforms();
+
+  materialMap[0] = &wallMaterial;
+  materialMap[1] = &floorMaterial;
+  materialMap[9] = &topMaterial;
+
+
+  Texture shotgunAtlas("res/textures/revolver.png", GL_RGBA);
+  player_shader.set_uniformI("texture1", shotgunAtlas.texture);
+
+
+  std::vector<glm::vec4> uvs = {
+    glm::vec4(0.2f, 0.58f, 0.4f, 1.0f),
+    glm::vec4(0.4f, 0.62f, 0.6f, 1.0f),
+    glm::vec4(0.6f, 0.6f, 0.8f, 1.0f),
+    glm::vec4(0.0f, 0.6f, 0.20f, 1.0f),
+  };
+
+  /*std::vector<glm::vec4> uvs = {
+    glm::vec4(0.0f, 0.68f, 0.15f, 1.0f),
+    glm::vec4(0.14f, 0.73f, 0.32f, 1.0f),
+    glm::vec4(0.32f, 0.73f, 0.48f, 1.0f),
+    glm::vec4(0.48f, 0.73f, 0.63f, 1.0f),
+    glm::vec4(0.632f, 0.73f, 0.78f, 1.0f),
+    glm::vec4(0.78f, 0.73f, 1.0f, 1.0f),
+  };*/
+
+  Animation shotgunAnimation(uvs);
+
+
   /* --------------------------
   Create objects in the scene
   -----------------------------*/
   Mesh cubeMesh(cubeModel, cubeIndices);
+  Mesh rectangleMesh(rectangleModel, rectangleIndices);
+
+  std::cout << cubeMesh.EBO << std::endl;
+  std::cout << rectangleMesh.EBO << std::endl;
+
   Map::init(gameMap);
 
   auto cubes = build_map(gameMap, 
-                        &cubeMesh, 
-                        &wallMaterial,
-                        &floorMaterial,
-                        &topMaterial);
-  /*glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3( 2.0f,  5.0f, -15.0f), 
-    glm::vec3(-1.5f, -2.2f, -2.5f),  
-    glm::vec3(-3.8f, -2.0f, -12.3f),  
-    glm::vec3( 2.4f, -0.4f, -3.5f),  
-    glm::vec3(-1.7f,  3.0f, -7.5f),  
-    glm::vec3( 1.3f, -2.0f, -2.5f),  
-    glm::vec3( 1.5f,  2.0f, -2.5f), 
-    glm::vec3( 1.5f,  0.2f, -1.5f), 
-    glm::vec3(-1.3f,  1.0f, -1.5f) 
-  };*/
+                        &cubeMesh);
 
-  //Object cubes[10];
-  Player player(&cam);
+
+  Sprite gunSprite(&rectangleMesh, 
+                  &shotgunAtlas, 
+                  &player_shader, 
+                  glm::vec2(0.2f, -0.6f), 
+                  uvs[0]);
+
+  gunSprite.add_animation(&shotgunAnimation);
+  scene.add_sprite(&gunSprite);
+
 
   for (size_t i = 0; i < cubes.size(); i++) {
     scene.add_object(&cubes[i]);
   }
 
+  Player player(&cam, &gunSprite);
+
   while(!glfwWindowShouldClose(window)) {
     if (!scene.dbg_mode) {
       player.update(scene.get_delta_time());
     }
+    
+
     scene.update();
     scene.render();
 
     glfwSwapBuffers(window);
+
     glfwPollEvents();
   }
   

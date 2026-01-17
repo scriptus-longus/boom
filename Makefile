@@ -14,7 +14,7 @@ BUILD_DIR := build
 # -------- Files --------
 TARGET   := build/boom
 
-CPP_SRCS := $(SRC_DIR)/main.cpp $(SRC_DIR)/stb_image.cpp $(SRC_DIR)/shader.cpp $(SRC_DIR)/material.cpp $(SRC_DIR)/camera.cpp $(SRC_DIR)/mesh.cpp $(SRC_DIR)/scene.cpp $(SRC_DIR)/input_handler.cpp
+CPP_SRCS := $(SRC_DIR)/main.cpp $(SRC_DIR)/stb_image.cpp $(SRC_DIR)/shader.cpp $(SRC_DIR)/material.cpp $(SRC_DIR)/camera.cpp $(SRC_DIR)/mesh.cpp $(SRC_DIR)/scene.cpp $(SRC_DIR)/input_handler.cpp $(SRC_DIR)/texture.cpp $(SRC_DIR)/animation.cpp $(SRC_DIR)/sprite.cpp
 C_SRCS   := $(SRC_DIR)/glad.c
 
 CPP_OBJS := $(CPP_SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)

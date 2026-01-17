@@ -14,6 +14,7 @@
 #include "object.hpp"
 #include "camera.hpp"
 #include "input_handler.hpp"
+#include "sprite.hpp"
 
 class Scene {
 private:
@@ -25,6 +26,7 @@ public:
   Camera* cam;
   std::vector<Object*> objects;
   std::vector<Shader*> shader;
+  std::vector<Sprite*> sprites;
   GLFWwindow* window; 
 
 
@@ -33,6 +35,7 @@ public:
   void add_object(Object* cube);
 
   void add_shader(Shader* object);
+  void add_sprite(Sprite* sprite);
 
   void update();
 

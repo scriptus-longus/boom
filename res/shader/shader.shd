@@ -34,3 +34,49 @@ void main() {
 }
 
 #END_SHADER
+
+#DEF_SHADER
+#VERT_SHADER
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+out vec2 texCoord;
+
+//uniform mat4 projection;
+//uniform mat4 view;
+uniform mat4 model;
+uniform vec4 uv;
+
+void main() {
+  //gl_Position = transform * vec4(aPos, 1.0);
+  float scale = (uv.w - uv.y) / (uv.z - uv.x);
+  gl_Position = model * vec4(aPos.x * 0.5, aPos.y * scale * 0.5, aPos.z, 1.0);
+  //gl_Position = model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+
+  //vec2 bottom_left = vec2(0.0, 0.25*3);
+  //vec2 top_right = vec2(0.15, 1);
+  //texCoord = aTexCoord;
+  texCoord = mix(uv.xy, uv.zw, aTexCoord); //aTexCoord; //mix(, 1.0, aTexCoord);
+  //texCoord = mix(bottom_left, top_right, aTexCoord); //aTexCoord; //mix(, 1.0, aTexCoord);
+}
+
+#FRAG_SHADER
+
+#version 330 core
+out vec4 FragColor;
+
+in vec2 texCoord;
+
+uniform sampler2D texture1;
+
+void main() {
+  //FragColor = texture(outTexture, texCoord) * vec4(outColor, 1.0);
+  vec4 texColor = texture(texture1, texCoord);
+  if (texColor.a < 0.1) {
+    discard;
+  }
+  FragColor = texColor; //texture(texture1, texCoord); 
+}
+
+#END_SHADER

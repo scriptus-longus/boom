@@ -15,6 +15,7 @@
 #include "input_handler.hpp"
 #include "scene.hpp"
 #include "camera.hpp"
+#include "sprite.hpp"
 
 Scene::Scene(Camera* cam, GLFWwindow* window) {
   this->cam = cam;
@@ -30,6 +31,10 @@ void Scene::add_object(Object* cube) {
 
 void Scene::add_shader(Shader* object) {
   this->shader.emplace_back(object);
+}
+
+void Scene::add_sprite(Sprite* sprite) {
+  this->sprites.emplace_back(sprite);
 }
 
 void Scene::update() {
@@ -57,7 +62,6 @@ void Scene::render() {
       object->material->shader->set_uniformMat("model", model);
     } 
 
-
     if(object->mesh != nullptr) {
       object->mesh->draw();
     }
@@ -73,6 +77,11 @@ void Scene::render() {
   for (auto& s : this->shader) {
     s->set_uniformMat("projection", projection);
     s->set_uniformMat("view", view);
+  }
+
+  for (auto& s: this->sprites) {
+    s->update(this->deltaTime);
+    s->draw();
   }
 }
 

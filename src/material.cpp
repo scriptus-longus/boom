@@ -23,7 +23,7 @@ Material::~Material() {
   glDeleteTextures(MAX_TEXTURES, this->textures);
 }
 
-void Material::add_texture(std::string path, std::string uniform) {
+void Material::add_texture(std::string path, std::string uniform, GLenum format) {
   if (texIdx >= MAX_TEXTURES) {
     std::cout << "Error:Material:AddTexture: Maximum number of textures exceded" << std::endl;
     return;
@@ -47,11 +47,11 @@ void Material::add_texture(std::string path, std::string uniform) {
   if (data) {
     std::cout << "Info: Loaded texture successfully from " << path << std::endl;
 
-    if (path.find(".jpg") != std::string::npos) {
+    /*if (path.find(".jpg") != std::string::npos) {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    } else {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widht, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    }
+    } else {*/
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widht, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //}
 
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {

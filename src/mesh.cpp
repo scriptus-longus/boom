@@ -11,7 +11,7 @@ Mesh::Mesh(std::vector<float> vertices, std::vector<uint32_t> indices) {
   glGenBuffers(1, &this->VBO);
   glGenBuffers(1, &this->EBO);
 
-  glBindVertexArray(VAO);
+  glBindVertexArray(this->VAO);
   glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
   /*std::cout << vertices << std::endl;
@@ -32,17 +32,19 @@ Mesh::Mesh(std::vector<float> vertices, std::vector<uint32_t> indices) {
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
+
   this->n_elements = indices.size();
 }
 
 Mesh::~Mesh() {
-  std::cout << "Deleting cube" << std::endl;
+  std::cout << "deleting Mesh" << std::endl;
   glDeleteVertexArrays(1, &this->VAO);
   glDeleteVertexArrays(1, &this->VBO);
   glDeleteVertexArrays(1, &this->EBO);
 }
 
 void Mesh::draw() {
+  glBindVertexArray(this->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
   glDrawElements(GL_TRIANGLES, this->n_elements, GL_UNSIGNED_INT, 0);
 }
