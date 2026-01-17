@@ -65,28 +65,12 @@ Functions to move the camera
 */
 void Camera::move(glm::vec3 v) {
   glm::vec3 base_x = glm::normalize(glm::vec3(this->camFront.x, 0, this->camFront.z));
-  glm::vec3 base_y = glm::normalize(this->camUp);
+  //glm::vec3 base_y = glm::normalize(this->camUp);
   glm::vec3 base_z = glm::normalize(glm::cross(this->camFront, this->camUp));
 
   // linear combindation
   this->position += v.x * base_x + v.z * base_z; //+ v.y * base_y;
 }
-/*
-void Camera::move_front(float v) {
-  auto new_pos = this->position + glm::normalize(glm::vec3(this->camFront.x, 0, this->camFront.z)) * v;
-
-  if (Map::is_free() || Scene::dbg_mode) {
-    this->position = new_pos;
-  }
-}
-
-void Camera::move_right(float v) {
-  auto new_pos = this->position + glm::normalize(glm::cross(this->camFront, this->camUp)) * v;
-
-  if (Map::is_free(new_pos) || Scene::dbg_mode) {
-    this->position = new_pos;
-  }
-}*/
 
 void Camera::set_position(glm::vec3 pos) {
   this->position = pos;

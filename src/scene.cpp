@@ -79,9 +79,11 @@ void Scene::render() {
     s->set_uniformMat("view", view);
   }
 
-  for (auto& s: this->sprites) {
-    s->update(this->deltaTime);
-    s->draw();
+  if (!this->dbg_mode) {
+    for (auto& s: this->sprites) {
+      s->update(this->deltaTime);
+      s->draw();
+    }
   }
 }
 
