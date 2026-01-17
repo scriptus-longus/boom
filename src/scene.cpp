@@ -90,15 +90,6 @@ void Scene::render() {
 void Scene::processInput() {
   float v = static_cast<float>(4.0f * this->deltaTime);
 
-  /*if(InputHandler::keyDown(GLFW_KEY_W))
-    this->cam->move_front(camSpeed);
-  if(InputHandler::keyDown(GLFW_KEY_S)) 
-    this->cam->move_front(-camSpeed);
-
-  if(InputHandler::keyDown(GLFW_KEY_A)) 
-    this->cam->move_right(-camSpeed);
-  if(InputHandler::keyDown(GLFW_KEY_D)) 
-    this->cam->move_right(camSpeed);*/
   if(InputHandler::keyPressed(GLFW_KEY_TAB)) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     this->dbg_mode = !this->dbg_mode;

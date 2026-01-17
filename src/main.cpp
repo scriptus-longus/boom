@@ -344,7 +344,7 @@ int main() {
   Sprite gunSprite(&rectangleMesh, 
                   &shotgunAtlas, 
                   &player_shader, 
-                  glm::vec2(0.2f, -0.6f), 
+                  glm::vec2(0.1f, -0.6f), 
                   uvs[0]);
 
   gunSprite.add_animation(&shotgunAnimation);
